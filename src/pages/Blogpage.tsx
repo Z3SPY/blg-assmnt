@@ -1,13 +1,12 @@
 import React from 'react'
+import { useParams } from 'react-router-dom';
 
-interface Props {
-    title: string;
-    content: string;
 
-}
+function Blogpage() {
 
-function Blogpage(props: Props) {
-    const {title, content} = props
+    // Get Id from use Params
+
+    // Call supabase repository to get blog by id
 
     return (
         <div>

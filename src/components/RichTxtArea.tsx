@@ -1,39 +1,28 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { Markdown } from '@tiptap/markdown'
+import { RichButton } from './RichButton'
 
 
-interface ButtonStyles {
-    onClick: () => void;
-    isActive: (format: string) => boolean;
-    children?: React.ReactNode;
-}
-
-const RichButton = (btnStyles : ButtonStyles) => {
-    return (
-        <button className={`px-3 py-2 mr-1 border border-gray-300 cursor-pointer ${
-            btnStyles.isActive('bold') ? 
-            'bg-gray-200 font-bold' : 
-            'bg-white font-normal'}`}  
-            
-            onClick={(e) => {
-                e.preventDefault();
-                btnStyles.onClick();
-            }}>
-            {btnStyles.children}
-
-        </button>
-    )
-}
 
 const RichTxtArea = () => {
-    
-    const editor = useEditor({
-    extensions: [StarterKit],
-    content: '<p>Hello World!</p>',
+  
+  Markdown.configure({
+  indentation: {
+    style: 'space', // 'space' or 'tab'
+    size: 5, // Number of spaces or tabs
+  },
+})
+
+  // Tip Tap Handler
+  const editor = useEditor({
+    extensions: [StarterKit, Markdown],
+    content: '# Hello World\n\nThis is **Markdown**!',
+    contentType: 'markdown'
   })
 
   if (!editor) {
-    return null
+    return null 
   }
 
   return (

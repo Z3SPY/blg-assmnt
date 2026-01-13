@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;  
+
+#main-form > * ,
+#main-form form > *
+{
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+
+#main-form > *:nth-child(1) { animation-delay: 0ms; }
+#main-form > *:nth-child(2) { animation-delay: 100ms; }
+#main-form > *:nth-child(3) { animation-delay: 200ms; }
+#main-form > *:nth-child(4) { animation-delay: 300ms; }
+
+#main-form form > *:nth-child(1) { animation-delay: 100ms; }
+#main-form form > *:nth-child(2) { animation-delay: 200ms; }
+#main-form form > *:nth-child(3) { animation-delay: 300ms; }
+#main-form form > *:nth-child(4) { animation-delay: 400ms; }
+
+@keyframes fadeUp {
+    from {}
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+@layer components {
+    .auth-btn {
+        display: inline-block;
+        @apply rounded-md shadow-lg p-2 shadow-neutral-950 text-white bg-neutral-900;
+        @apply transition-all duration-300 ease-in-out;
+        transform: translateY(0); 
+    }
+
+    .auth-btn:hover:not(:disabled) {
+        transform: translateY(-5px);
+        @apply bg-neutral-800; 
+    }
+
+    .authInputs {
+        @apply p-2 rounded-sm;
+    }
+}

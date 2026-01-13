@@ -5,17 +5,18 @@ import App from './App.tsx'
 
 // Redux imports
 import { Provider } from 'react-redux';
-import { store } from './state/store';
+import { store, persistor } from './state/store';
+import { PersistGate } from 'redux-persist/integration/react'; // ← Add this
+
 
 /** Put Redux Provider here */
 
 createRoot(document.getElementById('root')!).render(
 
-  
   <Provider store={store}>
-    <StrictMode>
-      <App />
-    </StrictMode>,  
+      <PersistGate loading={null} persistor={persistor}>
+          <App />
+      </PersistGate>
   </Provider>
 
 
