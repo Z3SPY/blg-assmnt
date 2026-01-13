@@ -10,34 +10,44 @@ export class BlogRepository implements IBlogRepository {
 
     // ===================
     // Session less views
-    async getBlogById(id: string): Promise<BlogType> {
+    async getBlogById(blogId: string): Promise<BlogType> {
 
-        try {
-            const { data, error } = await supabase
-                    .from('blogs')
-                    .select('*')
-                    .eq("id", id)
-                    .single()
+        const { data, error } = await supabase
+                .from('blogs')
+                .select('*')
+                .eq("id", blogId)
+                .single()
 
-            if (error) throw error;
+        if (error) throw error;
+        // Data handle 
+        console.log(data);
+        return data as BlogType;
+    }
 
-            // Data handle 
-            console.log(data);
-            return data as BlogType;
 
-        } catch (error) {
-            console.log("ERROR getBlogById: ", error);
-            throw new Error("Method not implemented.");
-        }
-        
+    // Get all blogs by a specific user
+    async getAllBlogsById(userId: string): Promise<BlogType[]> {
+        const { data, error } = await supabase
+                .from('blogs')
+                .select('*')
+                .eq("user_id", userId)
+
+                if (error) throw error;
+        // Data handle 
+        console.log(data);
+        return data as BlogType[];
     }
 
     
-    getAllBlogs(): Promise<BlogType[]> {
+    async getAllBlogs(): Promise<BlogType[]> {
 
+        const {data, error} = await supabase
+            .from('blogs')
+            .select('*');
 
+        if (error) throw error;
+        return data as BlogType[];
 
-        throw new Error("Method not implemented.");
     }
 
 
@@ -45,25 +55,15 @@ export class BlogRepository implements IBlogRepository {
     // ===================
     // Session Views
     async createBlog(blog: BlogType): Promise<BlogType> {
-
-
         // Validate blog
-
         // Supabase Insert
-        try {
-            const { data, error } =  await supabase
-                        .from('blogs')
-                        .insert(blog)
-
-            if (error) throw error;
-
-            console.log(data);
-            return data as unknown as BlogType;
-                    
-        } catch (error) {
-            console.log("ERROR creatingBlog: ", error);
-            throw new Error("Method not implemented.");
-        }
+        const { data, error } =  await supabase
+                    .from('blogs')
+                    .insert(blog)
+        if (error) throw error;
+        console.log(data);
+        return data as unknown as BlogType;
+                   
     }
 
     

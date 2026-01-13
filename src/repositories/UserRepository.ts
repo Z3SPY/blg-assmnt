@@ -6,12 +6,32 @@ import { supabase } from "@/lib/supabase";
 
 class UserRepositories implements IUserRepository {
 
-    getUserById(id: string): Promise<ProfileType> {
-        throw new Error("Method not implemented.");
+    // ===================
+    // GET USERS BY ID
+    async getUserById(id: string): Promise<ProfileType> {
+        const {data, error} = await supabase
+            .from("profile")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error) throw new Error(`User could not be found: ${error.message}` )
+        return data as ProfileType
     }
-    getAllUsers(): Promise<ProfileType[]> {
-        throw new Error("Method not implemented.");
+
+    // ===================
+    // GET ALL USERS
+    async getAllUsers(): Promise<ProfileType[]> {
+        const {data, error} = await supabase
+            .from("profile")
+            .select("*");
+        
+        if (error) throw error;
+        return data as ProfileType[];
     }
+
+    // ===================
+    // CREATE USER PROFILE
     async createUser(id: string, username: string): Promise<ProfileType> {
         // call supabase create a publkic instance
         // New instance so should be blank
@@ -34,11 +54,29 @@ class UserRepositories implements IUserRepository {
 
         return data as ProfileType
     }
-    updateUser(id: string, user: ProfileType): Promise<ProfileType> {
-        throw new Error("Method not implemented.");
+
+    // ===================
+    // UPDATE USER PROFILE
+    async updateUser(id: string, user: ProfileType): Promise<ProfileType> {
+        const {data, error} = await supabase
+            .from("profile")
+            .update(user)
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as ProfileType;
     }
-    deleteUser(id: string): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    // ===================
+    // DELETE USER PROFILE
+    async  deleteUser(id: string): Promise<void> {
+        const { error } = await supabase
+            .from("profile")
+            .delete()
+            .eq("id", id);
+        if (error) throw error;
     }
 }
 
