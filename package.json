@@ -16,6 +16,8 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@reduxjs/toolkit": "^2.11.2",
     "@supabase/supabase-js": "^2.90.1",
+    "@tiptap/extension-image": "^3.15.3",
+    "@tiptap/extension-table": "^3.15.3",
     "@tiptap/markdown": "^3.15.3",
     "@tiptap/react": "^3.15.3",
     "@tiptap/starter-kit": "^3.15.3",

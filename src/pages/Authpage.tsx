@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PencilLine } from 'lucide-react';
+import { PencilLine, CircleArrowLeft } from 'lucide-react';
 
 // Redux actions
 import { _rdxLogin, _rdxLogout } from "../state/session/session";
@@ -38,6 +38,9 @@ function Authpage(props: { AuthState?: boolean }) {
     const [email, setEmail] = useState<string>("");
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+
+
+
 
 
     const navigate = useNavigate();  
@@ -100,12 +103,14 @@ function Authpage(props: { AuthState?: boolean }) {
             // ====================
             // redux action dispatch
             dispatch(_rdxLogin(
-                {userName: email,
+                {userName: user.username,
                 userId: user.id,
              } as SessionPayload
 
             ));
             // ====================
+
+            navigate('/');
             
         } catch (error) {
             setAuthError(error instanceof Error ? error.message : 'Sign up failed');
@@ -131,13 +136,19 @@ function Authpage(props: { AuthState?: boolean }) {
            // Need Validation to check if login was successful
             // ====================
             // redux action dispatch
+            
+
             dispatch(_rdxLogin(
-                    {userName: email,
+                    {userName: user.username,
                     userId: user.id,
                 } as SessionPayload
 
             ));
             // ====================
+            
+
+            navigate('/');
+
         } catch (error) {
             setAuthError(error instanceof Error ? error.message : 'Sign up failed');
         } finally {
@@ -181,27 +192,33 @@ function Authpage(props: { AuthState?: boolean }) {
 
 
     // If user is logged in, show welcome screen
-    if (session) {
+    if (session && !loading) {
 
         // Session Open, Then gives out error
-         setTimeout(() => {
-            navigate('/');
-        }, 5000); // 300,000 ms = 5 minutes
 
+        // Only load if not loading
+        if (!loading) {
+            setTimeout(() => {
+                navigate('/');
+            }, 0); //50000 
+        }
+         
+
+        /*
         return (
             <div>
                 <h1>Welcome!</h1>
                 <p>You are logged in as: {session.user.email}</p>
                 <button onClick={handleLogout}>Sign Out</button>
             </div>
-        );
+        );*/
     }
 
     // Show login/signup form
     return (
         <>
             <div className="absolute top-10 left-16 text-[2vh] flex gap-2 text-white font-bold cursor-pointer" onClick={() => {navigate("/")}}>
-                <PencilLine className="bg-zinc-700 p-1 rounded-md h-7 w-7 shadow-sm shadow-neutral-900"/> Jotted
+                <PencilLine className="bg-zinc-700 p-1 rounded-md h-7 w-7 shadow-sm shadow-neutral-900"/> Jotted.
             </div>
             <div className="h-screen bg-neutral-900 flex justify-center items-center [&>*]:animate-in [&>*]:fade-in [&>*]:duration-1000 [&>*]:slide-in-from-bottom-2 [&>*]:[animation-delay:calc(var(--i)*100ms)]">
                 <div id="main-form" className="md:w-4/6 lg:w-3/6
@@ -282,7 +299,13 @@ function Authpage(props: { AuthState?: boolean }) {
                                 {isSignUp ? 'Login' : 'Sign Up'}
                             </button>
                         </p>
+
+                        <button onClick={() => {navigate("/")}} className="back-btn bg-neutral-600 mt-auto self-start px-4 py-2 rounded text-white flex gap-2"> 
+                            <CircleArrowLeft />  Back
+                        </button>
                 </div>
+
+                
                 
             </div>
         </>

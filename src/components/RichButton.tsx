@@ -8,7 +8,7 @@ interface ButtonStyles {
 
 export const RichButton = (btnStyles : ButtonStyles) => {
     return (
-        <button className={`px-3 py-2 mr-1 border border-gray-300 cursor-pointer ${
+        <button className={`px-2 py-1 mr-1 border rounded-sm shadow-neutral-800 shadow-sm border-gray-300 cursor-pointer ${
             btnStyles.isActive('bold') ? 
             'bg-gray-200 font-bold' : 
             'bg-white font-normal'}`}  

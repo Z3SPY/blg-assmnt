@@ -12,9 +12,9 @@ interface BlogType {
 
 interface ProfileType {
     id: string;
-    userName?: string;
+    username?: string;
     bio?: string;
-    avatarUrl?: string;
+    avatar_url?: string;
     createdAt?: string;
 }
 

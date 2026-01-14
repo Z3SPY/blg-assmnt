@@ -29,7 +29,7 @@ function App() {
                 console.log(data);  
 
                 dispatch(_rdxLogin({
-                  userName: data.email,
+                  userName: data.username,
                   userId: data.id,} as SessionPayload
                 ) )
 

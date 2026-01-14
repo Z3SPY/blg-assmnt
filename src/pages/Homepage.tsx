@@ -10,7 +10,7 @@ import { authService } from '../services/AuthServices';
 
 
 import { Navbar01 } from '@/components/ui/shadcn-io/navbar-01';
-
+import BlogFooter from '@/components/Footer';
 
 //Styling
 import "./css/Homepage.css";
@@ -39,6 +39,8 @@ function Homepage() {
 
                 reduxFunc={handleLogout}
                 userIdSession = {userId}    
+
+                wherePage = {"Home"}
             />
 
 
@@ -49,12 +51,9 @@ function Homepage() {
                     <div className='flex-1 bg-blue-500'> a </div>
                 </div>
             </div>
-            
-            <div id='footer' className='h-32 bg-neutral-950'> 
-                
-            </div>
 
-            
+
+            <BlogFooter />
         </>
     )
 }

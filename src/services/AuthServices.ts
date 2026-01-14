@@ -2,6 +2,7 @@ import type { IAuthServices } from "../repositories/Interfaces/IUserRepository";
 import { supabase } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import { userRepositry } from "@/repositories/UserRepository";
+import type { ProfileType } from "@/types/stateTypes";
 
 
 // Acts as a layer for connecting to Repostories
@@ -9,8 +10,9 @@ import { userRepositry } from "@/repositories/UserRepository";
 
 export class AuthService implements IAuthServices {
 
+    // ===================
     // Create new User
-    async signUp(email: string, password: string, username: string): Promise<User> {
+    async signUp(email: string, password: string, username: string): Promise<ProfileType> {
 
         // if Create here, pass some user id to user Repository
         const { data, error } = await supabase.auth.signUp({
@@ -23,9 +25,12 @@ export class AuthService implements IAuthServices {
 
         // If successful create an instance of profile objects
         try {
-            await userRepositry.createUser(data.user.id, username);
+            // Get Context for both maybe?
+            // Flow basically is 
+            // (Immutable) Auth User => Profile Data
+            const profileData = await userRepositry.createUser(data.user.id, username);
             alert("Account created! You can now log in.");
-            return data.user;
+            return profileData; // Returned as profile Type (Note: its the one with username)
         } catch (pError) {
             console.error("Authenticaion Worked, but Profile instance failed");
             throw pError;
@@ -33,9 +38,11 @@ export class AuthService implements IAuthServices {
         
     }
 
-
+    // ===================
     // Login to User
-    async signIn(email: string, password: string): Promise<User> {
+    async signIn(email: string, password: string): Promise<ProfileType> {
+
+        // just base Root Auth from supabase
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -44,18 +51,36 @@ export class AuthService implements IAuthServices {
         if (error) throw error;
         if (!data.user) throw new Error('Sign in failed');
 
-        return data.user;
+        // Then get profile type form user repo
+
+        try {
+            const profileData = await userRepositry.getUserById(data.user.id);
+            return profileData;
+        } catch (pError) {
+            console.error("Unable to create a profile instance");
+            throw pError;
+        }
+
     }
     
+    // ===================
     async signOut(): Promise<void> {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
     }
 
-   async getUserSession(): Promise<User | null> {
-        const { data: { user }, error } = await supabase.auth.getUser();
+    // ===================
+    async getUserSession(): Promise<ProfileType | null> {
+        const { data , error } = await supabase.auth.getUser();
         if (error) throw error;
-        return user;
+
+        try {
+            const profileData = await userRepositry.getUserById(data.user.id);
+            return profileData;
+        } catch (pError) {
+            console.error("Unable to create a profile instance");
+            throw pError;
+        }
     }
 
     

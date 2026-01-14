@@ -18,6 +18,10 @@ import { cn } from '@/lib/utils';
 // Icons
 import { PencilLine, Signature, CircleUser  } from 'lucide-react';
 import HamburgerIcon from '@/components/ui/hamburger';
+import type { RootState } from '@/state/store';
+import { useSelector } from 'react-redux';
+
+import { useNavigate } from 'react-router-dom';
 
 
 // Hamburger icon component
@@ -47,9 +51,13 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
   onCtaClick?: () => void;
   onCreateClick?: () => void;
 
+  onLogoClick?: () => void;
+
 
   // Session Checker
   userIdSession?: string | null;
+
+  wherePage?: string;
 
 }
 
@@ -80,10 +88,21 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
       onSignInClick,
       onCtaClick,
       userIdSession,
+      onLogoClick,
+
+      wherePage = 'Home',
       ...props
     },
     ref
   ) => {
+
+    // redux Session Chekcer
+    const {userName, userId} = useSelector((state: RootState) => state.session)
+
+
+    // Ends here
+
+
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
 
@@ -131,6 +150,13 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
       }
     }, [ref]);
 
+    
+    const navigate = useNavigate();
+    // THIS IS IMPORTANT NAVIGATES TO PROFILE WITH ID
+    const NavigateToProfile = (id: string) => {
+      navigate(`/profile/${id}`);
+    }
+
     return (
       <header
         ref={combinedRef}
@@ -148,7 +174,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
 
 
             {/* Mobile menu trigger */}
-            {isMobile && (
+            {isMobile && wherePage === "Home" && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -194,27 +220,35 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 <div className="text-2xl">
                   {logo}
                 </div>
-                <span className="hidden font-bold text-xl sm:inline-block">Jotted</span>
+                <span className="hidden font-bold text-xl sm:inline-block" onClick={onLogoClick}>Jotted.</span>
               </button>
               {/* Navigation menu */}
               {!isMobile && (
                 <NavigationMenu className="flex">
                 <NavigationMenuList className="gap-1">
-                  {navigationLinks.map((link, index) => (
-                    <NavigationMenuItem key={index}>
-                      <button
-                        onClick={(e) => e.preventDefault()}
-                        className={cn(
-                          "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
-                          link.active 
-                            ? "bg-accent text-accent-foreground" 
-                            : "text-foreground/80 hover:text-foreground"
-                        )}
-                      >
-                        {link.label}
-                      </button>
-                    </NavigationMenuItem>
-                  ))}
+
+
+
+                  { wherePage === "Home" ?
+                  
+                    navigationLinks.map((link, index) => (
+                      <NavigationMenuItem key={index}>
+                        <button
+                          onClick={(e) => e.preventDefault()}
+                          className={cn(
+                            "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
+                            link.active 
+                              ? "bg-accent text-accent-foreground" 
+                              : "text-foreground/80 hover:text-foreground"
+                          )}
+                        >
+                          {link.label}
+                        </button>
+                      </NavigationMenuItem>
+                    )) : 
+                    
+                    null
+                  }
                 </NavigationMenuList>
                 </NavigationMenu>
               )}
@@ -227,16 +261,20 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 
                 userIdSession ? (
                   <div className='flex items-center gap-3 animate-in fade-in duration-500 '>
-                    <Button
-                      className='duration-100 hover:-translate-y-[-2px] transition-transform ease-in-out'
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onCreateClick?.();
-                      }}
-                    >
-                      <Signature />
-                      {createBlog}
-                    </Button>
+                    { wherePage === "Home" ? 
+                      <Button
+                        className='duration-100 hover:-translate-y-[-2px] transition-transform ease-in-out'
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onCreateClick?.();
+                        }}
+                      >
+                        <Signature />
+                        {createBlog}
+                      </Button>
+                      : null
+                    }
+                    
                       
                     <Popover>
                       <PopoverTrigger asChild>
@@ -247,7 +285,15 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                           Profile
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="flex flex-col">
+                      <PopoverContent className="flex flex-col ">
+                          <h1 className='text-center border-b-2 mb-2 p-2'> Logged in as: {userName} </h1>
+
+                          { wherePage != "Profile" ? 
+                          <Button variant={"outline"} className='mb-2'
+                            onClick={()=>{NavigateToProfile(userId!)}}
+                          > Go To Profile </Button>: null}
+                          
+
                           <Button onClick={(e)=>{
                             e.preventDefault();
                             reduxFunc();

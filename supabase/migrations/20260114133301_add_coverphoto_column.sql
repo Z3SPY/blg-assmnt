@@ -1,0 +1,2 @@
+ALTER TABLE IF EXIST public.blogs
+ADD COLUMN IF NOT EXISTS cover_path TEXT;

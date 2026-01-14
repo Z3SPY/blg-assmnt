@@ -1,0 +1,25 @@
+.ProseMirror:focus {
+  outline: none;
+}
+
+
+.ProseMirror {
+    min-height: 200px;
+}
+
+.ProseMirror h1 {
+    font-size: 36px;
+}
+
+
+.ProseMirror h2 {
+    font-size: 30px !important;
+}
+
+
+.view-mode-container img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+

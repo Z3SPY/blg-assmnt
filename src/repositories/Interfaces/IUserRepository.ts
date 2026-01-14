@@ -14,8 +14,8 @@ export interface IUserRepository {
 
 // Supabase Auth Profile
 export interface IAuthServices {
-    signUp(email: string,  password: string, username: string): Promise<User>;
-    signIn(email: string, password: string): Promise<User>;
+    signUp(email: string,  password: string, username: string): Promise<ProfileType>;
+    signIn(email: string, password: string): Promise<ProfileType>;
     signOut(): Promise<void>;
-    getUserSession(): Promise<User | null>;
+    getUserSession(): Promise<ProfileType | null>;
 }
