@@ -22,7 +22,12 @@ function Profilepage() {
     // Redux Checker
     // We check if params profile sent id is same with redux session id
     const { userId } = useSelector((state: RootState) => state.session);
-    const isOwnProfile = id === userId
+    const isOwnProfile = id === userId;
+
+    // Page Tester
+    const blogItems = 12;
+    const pageNumber =  Math.ceil(blogItems / 5); // Should Change Depending on screen size
+    const [pageCur, setPageCur] = useState(1);
 
 
     // First INIT use Effect
@@ -150,17 +155,62 @@ function Profilepage() {
                 <div>
                     <h2 className='text-[1.25rem] italic'> {profile?.username}'s Blogs </h2>
                     
-                    <div className='profile-blog-holder  shadow-[inset_0_1px_10px_rgba(0,0,0,0.3)] flex mt-5 w-full p-4 bg-neutral-50 '>
-                        {/* Reduce my overflow Usage needs some form of pagination*/}
-                        {/** USE A CARD COMPONENT HERE CREATE one */}
-                        {isOwnProfile ? 
-                            <div onClick={()=>navigate("/form")} className='transition-all hover:translate-y-[5px] hover:bg-neutral-600
-                                                                            cursor-pointer shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] min-h-[300px] min-w-[300px] bg-neutral-700 rounded-md border-2 flex justify-center items-center text-white font-semibold'>
-                                Create A Blog + 
-                            </div> : <></>
-                        }
+                    <div className='profile-blog-holder  shadow-[inset_0_1px_10px_rgba(0,0,0,0.3)] mt-5 w-full p-4 bg-neutral-50 '>
 
-                        {/** Map Something Here Always End With a spacing Flex*/}
+                        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2'>
+                            {/* Reduce my overflow Usage needs some form of pagination*/}
+                            {/** USE A CARD COMPONENT HERE CREATE one */}
+                            {isOwnProfile && pageCur == 1 ? 
+                                <div onClick={()=>navigate("/form")} className='transition-all hover:translate-y-[5px] hover:bg-neutral-600
+                                                                                cursor-pointer shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] min-h-[300px]  bg-neutral-700 rounded-md border-2 flex justify-center items-center text-white font-semibold'>
+                                    Create A Blog + 
+                                </div> : <></>
+                            }
+
+                            {/* Should include create but offset dont load*/}
+                            {Array.from({ length: blogItems })
+                            .slice((pageCur - 1) * 5, (pageCur - 1) * 5 + (isOwnProfile && pageCur === 1 ? 4 : 5)) // 0 - 5 || 5 - 10  what if 0 - 4, 4 - 9| 10 - 14
+                            .map((_, index) => {
+
+                                // NOTE ISSUES WITH RERENDERS ILL FIX LATER
+                                // We use a real index based on the slice
+                                const actualIndex = ((pageCur - 1) * 5) + index + 1;
+
+                                // NOTE WE CAN USE COMPONENT HERE
+                                return (
+                                    <div key={actualIndex} className="min-h-[300px] bg-white border rounded-md shadow-sm p-4">
+                                        <h4 className="font-bold">Test Blog #{actualIndex}</h4>
+                                        <p className="text-sm text-gray-500">Placeholder for page {pageCur}.</p>
+                                    </div>
+                                );
+                            })}
+
+                            {/** Map Something Here Always End With a spacing Flex*/}
+
+                            {/** BIGGG NOTE, DONT FORGET TO REPLACE THIS WITH A OBJECT ITERATOR ONCE THE DB IS DONE */}
+                            
+                        </div>
+                        
+                            <div className='page-holder gap-1 flex flex-row shadow-[inset_0_1px_10px_rgba(0,0,0,0.3)] mt-5 w-full p-4 bg-neutral-50'>
+                                {Array.from({length: pageNumber}).map((_, index) => {
+                                    const pageNum = index + 1;
+                                    return( 
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setPageCur(pageNum)}
+                                            className={`px-4 py-2 rounded-md transition-all ${
+                                                pageCur === pageNum 
+                                                ? 'bg-neutral-800 text-white shadow-md ' 
+                                                : 'bg-white text-neutral-600 hover:bg-neutral-200 border-neutral-500 border-[1px]'
+                                            }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        
+                        
 
 
 
