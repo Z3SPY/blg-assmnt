@@ -36,7 +36,7 @@ function Homepage() {
 
     
     useEffect(() => {
-        const fetchPage = async () => {
+        const fetchHomeData = async () => {
             const result = await blogRepository.getAllBlogs(currentPage, 5, searchQuery); 
             setBlogs(result.data);
             const pages = Math.ceil(result.count / 5);
@@ -44,7 +44,7 @@ function Homepage() {
             
         };
         
-        fetchPage();
+        fetchHomeData();
 
     }, [currentPage, searchQuery])
 
@@ -104,7 +104,7 @@ function Homepage() {
                         
                         <div className='image-holder flex flex-col lg:flex-row justify-start relative bg-neutral-100 p-4 sm:p-6 w-full shadow-black shadow-xl mt-6 z-10'>
                             <div className="flex flex-col gap-2 px-4  lg:mb-0">
-                                <h1 className="text-xl sm:text-2xl text-neutral-500 font-mono mt-4 font-bold">
+                                <h1 className="text-xl sm:text-2xl text-neutral-500 font-mono mt-4 font-bold pr-0 lg:pr-10">
                                     Crafted for storytellers by storytellers
                                 </h1>
                                 <p className="text-neutral-700 text-sm sm:text-md leading-relaxed max-w-md mb-16 sm:mb-20 lg:mb-0">
@@ -214,7 +214,6 @@ function Homepage() {
 
 
 
-            <BlogFooter />
         </>
     )
 }

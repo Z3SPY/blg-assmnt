@@ -4,10 +4,11 @@ import { blogRepository } from '@/repositories/BlogRepository';
 import { userRepositry } from '@/repositories/UserRepository';
 import type { RootState } from '@/state/store';
 import type { BlogType, ProfileType } from '@/types/stateTypes';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import { Button } from '@/components/ui/button';
 
 
 function Blogpage() {
@@ -18,11 +19,13 @@ function Blogpage() {
 
     const {userName, userId} = useSelector((state: RootState) => state.session)
     const [isLoading, setIsLoading] = useState(false);
+    const isOwnProfile = useRef(false);
 
     // Blog Content
     const [blogContent, setBlogContent] = useState<BlogType | null>(null);
     const [authorContent, setAuthorData] = useState<ProfileType | null>(null);
-
+    
+    
     useEffect(() => {
             // cant access no id
             if (!id) {
@@ -37,7 +40,9 @@ function Blogpage() {
                     {/** NOTE THIS IS BLOG ID NOT USER ID */}
                     const blogData = await blogRepository.getBlogById(id!);
                     const authorData = await userRepositry.getUserById(blogData.user_id);
-
+                    
+                    //Ownership
+                    isOwnProfile.current = blogData.user_id === userId;
                     
                     if (blogData && authorData) {
                         setBlogContent(blogData);
@@ -62,7 +67,29 @@ function Blogpage() {
         }, [id, navigate])
 
     
+    const HandleDelete = async () => {
+        const isConfirmed = confirm("Are you sure you want to delete this blog? This action cannot be undone.");
+    
+        if (!isConfirmed) return;
 
+        try {
+            setIsLoading(true);
+            await blogRepository.deleteBlog(id); // Where id is Use params id;
+            alert("Blog deleted successfully");
+            navigate("/");
+
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const HandleEdit = async () => {
+        // OnClick just navigate and pass params
+        navigate(`/form/${id}`);
+    }
 
     // Call supabase repository to get blog by id
 
@@ -75,7 +102,7 @@ function Blogpage() {
             
                     userIdSession = {userId}    
             
-                    wherePage = {"Home"}/>
+                    wherePage = {"Blog"}/>
 
             
             {/* THIS IS MY IMAGE HODLDER*/}
@@ -132,13 +159,38 @@ function Blogpage() {
                         {blogContent?.content || 'No content available.'}
                     </ReactMarkdown>
                 </article>
-
-                <button
+                
+                <div className='buttons flex flex-row justify-between'> 
+                    <Button
                     onClick={() => navigate(-1)}
-                    className="mt-12 px-6 py-3 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
-                >
-                    Back
-                </button>
+                    className="mt-12 px-6 py-3  text-white rounded-lg hover:bg-neutral-800 transition-all hover:translate-y-[5px]"
+                    >
+                        Back
+                    </Button>
+
+                    {isOwnProfile.current == true ? 
+                        <div className='flex gap-2'> 
+                            <Button
+                                onClick={() => HandleEdit()}
+                                className="mt-12 px-6 py-3 text-white rounded-lg hover:bg-neutral-800 transition-all hover:translate-y-[5px]"
+                            >
+                                Edit
+                            </Button> 
+
+                            <Button
+                                variant={"destructive"}
+                                onClick={() => HandleDelete()}
+                                className="mt-12 px-6 py-3 text-white rounded-lg hover:bg-neutral-800 transition-all hover:translate-y-[5px]"
+                            >
+                                Delete
+                            </Button> 
+                        </div>
+                        : null
+                    } 
+                    
+
+                </div>
+                
             </div>
 
         </div>

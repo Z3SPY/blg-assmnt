@@ -67,6 +67,7 @@ function App() {
             <Route path='/' element={<Homepage />}></Route>
             {/** BLOGS */}
             <Route path='/form' element={<Formpage />}></Route>
+            <Route path='/form/:id' element={<Formpage />}></Route>
             <Route path='/blog/:id' element={<Blogpage />}></Route>
             {/** AUTHENTICATION */}
             <Route path='/login' element={<Authpage AuthState={false} />} />
