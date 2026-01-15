@@ -20,7 +20,7 @@ class BlogRepository implements IBlogRepository {
 
         if (error) throw error;
         // Data handle 
-        console.log(data);
+        //console.log(data);
         return data as BlogType;
     }
 
@@ -34,24 +34,27 @@ class BlogRepository implements IBlogRepository {
 
                 if (error) throw error;
         // Data handle 
-        console.log(data);
+        //console.log(data);
         return data as BlogType[];
     }
 
     
-    async getAllBlogs(page: number, pageSize = 5): Promise<BlogType[]> {
+    async getAllBlogs(page: number, pageSize = 5): Promise<{ data: BlogType[], count: number}> {
 
         const startVal = (page - 1) * pageSize;
         const endVal = startVal + pageSize - 1;
 
-        const { data, error } = await supabase
+        const { data, error, count } = await supabase
             .from('blogs')
-            .select('*')
+            .select('*', { count: 'exact' })
             .order('created_at', { ascending: false })
             .range(startVal, endVal);
 
         if (error) throw error;
-        return data as BlogType[];
+        return { 
+            data: data as BlogType[], 
+            count: count || 0 
+        };
 
     }
 
@@ -95,7 +98,7 @@ class BlogRepository implements IBlogRepository {
 
 
         if (error) throw error;
-        console.log(data);
+        //console.log(data);
         return data as BlogType;
                    
     }

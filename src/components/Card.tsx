@@ -48,7 +48,7 @@ export function Card({blog}: CardProps) {
             </div>
 
             {/** This is text loc */}
-            <h4 className="font-bold text-[2rem]">{parsedTitle}</h4>
+            <h4 className="font-bold text-[1.75rem]">{parsedTitle}</h4>
             <p className='border-b-2 border-neutral-300 text-opacity-50 italic text-black '> {parsedTime}</p>
             <ReactMarkdown>{preview}</ReactMarkdown>
         </div>

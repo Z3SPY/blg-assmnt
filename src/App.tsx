@@ -26,7 +26,7 @@ function App() {
         try {
             const data = await authService.getUserSession();
             if (data) {
-                console.log(data);  
+                //console.log(data);  
 
                 dispatch(_rdxLogin({
                   userName: data.username,
@@ -37,7 +37,7 @@ function App() {
                 dispatch(_rdxLogout());
             }
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             dispatch(_rdxLogout());
         }
     };

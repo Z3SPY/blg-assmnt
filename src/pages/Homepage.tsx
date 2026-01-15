@@ -26,16 +26,22 @@ function Homepage() {
     const {userName, userId} = useSelector((state: RootState) => state.session)
     const dispatch = useDispatch<AppDispatch>();
 
-
+    // Blog List
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
     const [blogs, setBlogs] = useState<BlogType[]>([]);
+
     useEffect(() => {
         const fetchPage = async () => {
-            const data = await blogRepository.getAllBlogs(1, 5); // Load only 5
-            setBlogs(data);
+            const result = await blogRepository.getAllBlogs(currentPage, 5); 
+            setBlogs(result.data);
+            const pages = Math.ceil(result.count / 5);
+            setTotalPages(pages);
+            
         };
 
         fetchPage();
-    }, [])
+    }, [currentPage])
 
 
 
@@ -119,14 +125,38 @@ function Homepage() {
                 </div>
             </div>
 
-            <div id="blogs" className='pb-20 flex flex-col lg:flex-row'> 
+            <div id="blogs" className=' pb-20 flex flex-col lg:flex-row'> 
                 {/** Blogs List 3 In 1 page, with a more page section*/}
-                <div className='flex-grow px-4 sm:px-6 md:px-10 lg:px-16 '>
-                    <h2 className="text-2xl font-bold font-mono mb-8 text-neutral-800">
+                <div className='min-h-[100vh] flex flex-col flex-grow px-4 sm:px-6 md:px-10 lg:px-16 '>
+                    <h2 className="text-2xl font-bold font-mono text-neutral-800">
                         Latest Posts
                     </h2>
+                    {/** LControl the PaGES */}
+                    <div className="flex items-center gap-4 mt-8 pb-10">
+                        <Button 
+                            variant="outline"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(p => p - 1)}
+                        >
+                            Previous
+                        </Button>
+
+                        <span className="text-sm font-mono font-bold">
+                            Page {currentPage}
+                        </span>
+
+                        <Button 
+                            disabled={currentPage >= totalPages} 
+                            onClick={() => setCurrentPage(prev => prev + 1)}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                    
                     {/** Blogs here */}
                     <CardGrid className='gap-8' blogs={blogs} limit={5} ></CardGrid>
+                
+                    
                 </div>
         
 
@@ -139,11 +169,13 @@ function Homepage() {
                     </div>
                 </div>
 
+                
+
             </div>
 
             <div id="about" className="h-screen pt-10 px-10 lg:px-56 bg-neutral-900 flex flex-col sm:flex-row items-center">
                 {/* Text */}
-                <div className="flex-1 flex flex-col text-white lg:space-y-6">
+                <div className="flex-1 flex flex-col text-white space-y-2 lg:space-y-6">
                     <h2 className="text-4xl font-bold font-sans  text-[2rem] md:text-[4rem]">About Us</h2>
                     <p className="text-lg text-gray-300 font-mono">
                     Jotted allows you to archive and share your own experiences into the web. Our Jotted team makes sure that storytellers have a place to go all out.

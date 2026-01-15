@@ -85,7 +85,7 @@ You can add more images:`,
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return; // null check
 
-    console.log("SIZE: ", (selectedFile.size / (1024 * 1024)).toFixed(5)); // AS MB READER
+    //console.log("SIZE: ", (selectedFile.size / (1024 * 1024)).toFixed(5)); // AS MB READER
     // Check the size!! It needs to be lower than 50mb for the Supbase free tier
     // NOTE: THIS LOGIC IS THE OPPOSITE REJECTS ALL GREATER THAN MB
     if (selectedFile.size > Max_Upload) {
@@ -102,11 +102,11 @@ You can add more images:`,
 
         // We create some local url instance, for frontend only
         const localUrl = URL.createObjectURL(selectedFile);
-        console.log(localUrl);
+        //console.log(localUrl);
         setCoverPath(localUrl);
 
     } catch (error) {
-        console.log("ERROR UPLOAD: ", error);
+        //console.log("ERROR UPLOAD: ", error);
     } 
     finally {
         setFileIsLoading(false)
@@ -147,7 +147,7 @@ You can add more images:`,
             const data = blogRepository.createBlog( newBlog,file)
 
  
-            console.log("New Blog Created", (await data).title);
+            //console.log("New Blog Created", (await data).title);
             
 
 

@@ -199,8 +199,10 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                     {navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index} className="w-full">
                         <NavigationMenuLink > {/* Wrap in Link with asChild */}
-                          <button
-                            onClick={(e) => e.preventDefault()}
+                          <button 
+                            onClick={(e) => {e.preventDefault();
+                              document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
+                            }}
                             className={cn(
                               "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium...",
                               link.active ? "bg-accent text-accent-foreground" : "text-foreground/80"
@@ -242,7 +244,9 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                     navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index}>
                         <button
-                          onClick={(e) => e.preventDefault()}
+                          onClick={(e) => {e.preventDefault();
+                              document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
+                            }}
                           className={cn(
                             "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
                             link.active 
