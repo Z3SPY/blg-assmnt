@@ -8,7 +8,7 @@ export interface IUserRepository {
     getUserById(id: string): Promise<ProfileType>;
     getAllUsers(): Promise<ProfileType[]>;
     createUser(id: string, username: string): Promise<ProfileType>;
-    updateUser(id: string, user: ProfileType): Promise<ProfileType>;
+    updateUser(id: string, user: ProfileType, file: File): Promise<ProfileType>;
     deleteUser(id: string): Promise<void>;
 }
 

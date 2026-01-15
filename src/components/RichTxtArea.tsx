@@ -1,7 +1,7 @@
 import { Editor, EditorContent } from '@tiptap/react'
 import { RichButton } from './RichButton'
 import { useRef, useState } from 'react'
-import { Bold, List , Heading2 , Italic, Underline  } from 'lucide-react';
+import { Bold, List , Heading2, Heading1, Italic, Underline  } from 'lucide-react';
 
 
 type Props = {
@@ -33,15 +33,17 @@ function RichTxtArea({ editor, isEditing }: Props) {
           <Underline size={22} />
         </RichButton>
 
+        <RichButton isActive={() => editor.isActive('heading', { level: 1})}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
+            <Heading1  size={22} />
+        </RichButton>
+
         <RichButton isActive={() => editor.isActive('heading', { level: 2})}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
             <Heading2  size={22} />
         </RichButton>
 
-        <RichButton isActive={() => editor.isActive('bulletList')}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}>
-            <List   size={22}/>
-        </RichButton>
+        
       </div>
 
       {/* MAIN TIP TAP TEXT AREA */}

@@ -57,10 +57,36 @@ class UserRepositories implements IUserRepository {
 
     // ===================
     // UPDATE USER PROFILE
-    async updateUser(id: string, user: ProfileType): Promise<ProfileType> {
+    async updateUser(id: string, user: ProfileType, file: File): Promise<ProfileType> {
+        
+        let urlRef = user.avatar_url;
+
+        if (file) {
+            const fileName = `${user.id}-${Date.now()}.${file.name}`
+            const url = `avtrPic/${fileName}`
+
+            const {error : photoError} = await supabase.storage
+                .from("profile-pictures")
+                .upload(url, file, {
+                    upsert: false,
+                    cacheControl: '3600'
+                })
+            
+            if (photoError) throw photoError;
+
+            const { data } = await supabase.storage
+                .from("profile-pictures")
+                .getPublicUrl(url);
+
+            urlRef = data.publicUrl;
+        }
+
         const {data, error} = await supabase
             .from("profile")
-            .update(user)
+            .update({
+                ...user,
+                avatar_url: urlRef
+            })
             .eq("id", id)
             .select()
             .single();

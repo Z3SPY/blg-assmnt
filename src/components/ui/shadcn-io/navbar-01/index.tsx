@@ -18,10 +18,12 @@ import { cn } from '@/lib/utils';
 // Icons
 import { PencilLine, Signature, CircleUser  } from 'lucide-react';
 import HamburgerIcon from '@/components/ui/hamburger';
-import type { RootState } from '@/state/store';
-import { useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '@/state/store';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useNavigate } from 'react-router-dom';
+import { authService } from '@/services/AuthServices';
+import { _rdxLogout } from '@/state/session/session';
 
 
 // Hamburger icon component
@@ -45,7 +47,6 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
   createBlog?: string;
   createBlogHref?: string;
 
-  reduxFunc: () => void;
 
   onSignInClick?: () => void;
   onCtaClick?: () => void;
@@ -66,8 +67,8 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
   { href: '#', label: 'Home', active: true, },
-  { href: '#about', label: 'About' },
   { href: '#blogs', label: 'Blogs' },
+  { href: '#about', label: 'About' },
 ];
 
 export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
@@ -83,7 +84,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
       ctaHref = '#get-started',
       createBlog = 'Start Blogging',
       createBlogHref ='#create-blog',
-      reduxFunc,
+
       onCreateClick,
       onSignInClick,
       onCtaClick,
@@ -95,10 +96,18 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
     },
     ref
   ) => {
+    const navigate = useNavigate();
 
     // redux Session Chekcer
     const {userName, userId} = useSelector((state: RootState) => state.session)
 
+    const dispatch = useDispatch<AppDispatch>();
+
+    function handleLogout() {
+            authService.signOut(); // Kills the session from service
+            dispatch(_rdxLogout()); // Complete Reset Redux
+            navigate("/");
+    }
 
     // Ends here
 
@@ -151,7 +160,6 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
     }, [ref]);
 
     
-    const navigate = useNavigate();
     // THIS IS IMPORTANT NAVIGATES TO PROFILE WITH ID
     const NavigateToProfile = (id: string) => {
       navigate(`/profile/${id}`);
@@ -161,7 +169,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
       <header
         ref={combinedRef}
         className={cn(
-          'sticky top-0 z-50 w-full border-b bg-background/100 backdrop-blur supports-[backdrop-filter]:bg-background/100 px-4 md:px-6 [&_*]:no-underline',
+          'font-sans sticky top-0 z-50 w-full border-b bg-background/100 backdrop-blur supports-[backdrop-filter]:bg-background/100 px-4 md:px-6 [&_*]:no-underline',
           className
         )}
       >
@@ -190,7 +198,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                   <NavigationMenuList className="flex-col items-start gap-1">
                     {navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index} className="w-full">
-                        <NavigationMenuLink asChild> {/* Wrap in Link with asChild */}
+                        <NavigationMenuLink > {/* Wrap in Link with asChild */}
                           <button
                             onClick={(e) => e.preventDefault()}
                             className={cn(
@@ -217,10 +225,10 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 onClick={(e) => e.preventDefault()}
                 className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
               >
-                <div className="text-2xl">
+                <div className="text-2xl" onClick={onLogoClick}>
                   {logo}
                 </div>
-                <span className="hidden font-bold text-xl sm:inline-block" onClick={onLogoClick}>Jotted.</span>
+                <span className="hidden font-bold text-xl sm:inline-block" onClick={onLogoClick} >Jotted.</span>
               </button>
               {/* Navigation menu */}
               {!isMobile && (
@@ -296,7 +304,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
 
                           <Button onClick={(e)=>{
                             e.preventDefault();
-                            reduxFunc();
+                            handleLogout();
                           }}> Sign Out </Button>
                       </PopoverContent>
                     </Popover> 

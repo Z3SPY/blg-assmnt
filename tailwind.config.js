@@ -7,6 +7,10 @@ export default {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			sans: ['"Space Grotesk"', 'sans-serif'], 
+			mono: ['"Space Mono"', 'monospace'],
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

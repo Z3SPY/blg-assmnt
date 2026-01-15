@@ -16,6 +16,11 @@ import { Button } from '@/components/ui/button'
 import { Navbar01 } from '@/components/ui/shadcn-io/navbar-01'
 import BlogFooter from '@/components/Footer'
 
+
+import { blogRepository } from '@/repositories/BlogRepository'
+import { supabase } from '@/lib/supabase'
+import type { BlogType } from '@/types/stateTypes'
+
 function Formpage() {
 
   // Base Variables
@@ -23,8 +28,10 @@ function Formpage() {
   const navigate = useNavigate()
   const { userName, userId } = useSelector((state: RootState) => state.session)
 
+
+  // Session Checker?
   useEffect(() => {
-    if (!userId) navigate('/auth')
+    if (!userId) navigate('/login')
   }, [userId, navigate])
 
   const [blogTitle, setBlogTitle] = useState('')
@@ -64,7 +71,8 @@ You can add more images:`,
 
   const handleSave = () => {
     const markdown = editor.getMarkdown()
-    console.log('MARKDOWN:', markdown)
+    handleBlogUpload(markdown);
+    //console.log('MARKDOWN:', markdown)
   }
 
 
@@ -91,6 +99,8 @@ You can add more images:`,
 
         file2Upload.current = selectedFile;
 
+
+        // We create some local url instance, for frontend only
         const localUrl = URL.createObjectURL(selectedFile);
         console.log(localUrl);
         setCoverPath(localUrl);
@@ -106,8 +116,50 @@ You can add more images:`,
 
 
   // Blog Upload 
-  const handleBlogUpload = async () => {
+  const handleBlogUpload = async (markdown: string) => {
     // Do some data validation here for later, i might forget
+    if (!blogTitle || !editor) {
+        alert("Missing Values in Blog Instance");
+        return;
+    }
+
+    try {
+        
+
+        setFileIsLoading(true);
+
+
+        // Check if file2Upload is available
+        if (file2Upload.current) {
+            const file : File = file2Upload.current;
+            
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            if (userError || !userData.user) throw new Error("User not authenticated");
+
+            if (!userId) return;
+
+            const newBlog: BlogType = {
+                user_id: userData.user.id,
+                title: blogTitle,
+                content: markdown,
+            };
+            
+            const data = blogRepository.createBlog( newBlog,file)
+
+ 
+            console.log("New Blog Created", (await data).title);
+            
+
+
+        }
+
+    } catch (error) {
+        console.log("UPLOAD ERROR", error);
+        alert("Upload Error");
+    } finally {
+        setFileIsLoading(false);
+        navigate("/"); // after we then we navigate home
+    }
   } 
 
 
@@ -118,7 +170,6 @@ You can add more images:`,
             onSignInClick={() => {}} 
             onCtaClick={() => {}} 
             onCreateClick={() => {}}
-            reduxFunc={() => {}}
             userIdSession = {userId}    
             onLogoClick={() => navigate("/")}
 
@@ -173,18 +224,18 @@ You can add more images:`,
         <div className="flex flex-col">
             <input
             className={`p-1 transition-all ${
-                isEditing 
+                !isEditing 
                 ? 'text-4xl font-bold border-b-2 border-neutral-300 bg-transparent outline-none' 
                 : 'border-2 w-52 rounded-md border-neutral-600'
             }`}
             placeholder="Blog title"
             value={blogTitle}
             onChange={(e) => setBlogTitle(e.target.value)}
-            readOnly={isEditing}
+            readOnly={!isEditing}
             />
 
 
-            {isEditing && (
+            {!isEditing && (
             <p className="text-sm text-neutral-600 mt-2">By {userName}</p>
             )}
         </div>

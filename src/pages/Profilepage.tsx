@@ -2,13 +2,18 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { userRepositry } from '@/repositories/UserRepository';
 import { useNavigate } from 'react-router-dom';
-import type { ProfileType } from '@/types/stateTypes';
+import type { BlogType, ProfileType } from '@/types/stateTypes';
 import { Navbar01 } from '@/components/ui/shadcn-io/navbar-01';
 import BlogFooter from '@/components/Footer';
 import type { RootState } from '@/state/store';
 import { useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
+import { ImageOff, Pencil } from 'lucide-react';
+import { blogRepository } from '@/repositories/BlogRepository';
+
+
+import ReactMarkdown from 'react-markdown';
+import Card from '@/components/Card';
 
 function Profilepage() {
     const { id } = useParams();
@@ -16,8 +21,14 @@ function Profilepage() {
     const [loading, setIsLoading] = useState<boolean>(true); // Start with loading
     const [isEditing, setIsEditing] = useState(false);
 
+    
     const navigate = useNavigate();
-    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Edit Values
+    const file = useRef<HTMLInputElement>(null);
+    const bioRef = useRef<HTMLTextAreaElement>(null);
+    const file2Upload = useRef(null);
+    const [profilePic, setProfilePic] = useState<string | null>(null);
 
     // Redux Checker
     // We check if params profile sent id is same with redux session id
@@ -25,9 +36,27 @@ function Profilepage() {
     const isOwnProfile = id === userId;
 
     // Page Tester
-    const blogItems = 12;
-    const pageNumber =  Math.ceil(blogItems / 5); // Should Change Depending on screen size
+    const [blogItems, setBlogItems] = useState<BlogType[] | null>(null);
+    const pageNumber =  useRef<number>(0); // Should Change Depending on screen size // INDICATES
+    const [itemsPerPage, setItemsPerPage] = useState<number>(5);
     const [pageCur, setPageCur] = useState(1);
+
+    // Items per page Definor 
+    useEffect(() => {
+    const updateCapacity = () => {
+        if (window.innerWidth < 640) {
+            setItemsPerPage(2); 
+        } else if (window.innerWidth < 1024) {
+            setItemsPerPage(3); 
+        } else {
+            setItemsPerPage(5);
+        }
+    };
+
+    updateCapacity();
+    window.addEventListener('resize', updateCapacity);
+    return () => window.removeEventListener('resize', updateCapacity);
+}, []);
 
 
     // First INIT use Effect
@@ -43,12 +72,22 @@ function Profilepage() {
             try {
                 setIsLoading(true);
                 const data = await userRepositry.getUserById(id!);
+                const blogData = await blogRepository.getAllBlogsById(id!);
+
                 
                 if (data) {
                     setProfile(data);
                 } else {
                     console.error("User not found");
                 }
+
+                if (blogData) {
+                    setBlogItems(blogData);
+                    pageNumber.current =  Math.ceil(blogData?.length / 5);
+
+                } 
+
+               
             } catch (error) {
                 console.error("Error fetching profile:", error);
             } finally {
@@ -62,9 +101,94 @@ function Profilepage() {
     }, [id, navigate])
     
 
-    const handleImageClick = () => {
-        return;
+    const editToggle = () => {
+        if (isEditing) {
+            setProfilePic(null);
+            file2Upload.current = null;
+            bioRef.current = null;
+        }
+        setIsEditing(!isEditing)
     }
+
+    const handleSaveChanges = async () => {
+        if (!id) return;
+
+        try {
+            setIsLoading(true);
+            
+            // Get Value = no data validation for now
+            const updatedBio = bioRef.current?.value || profile?.bio;
+
+            const updatePayload: ProfileType = {
+                ...profile!,
+                id: id!,
+                bio: updatedBio || ""
+            };
+
+            if (file2Upload.current) {
+        
+                const data = await userRepositry.updateUser(id, updatePayload, file2Upload.current);
+
+                setProfile(data);
+                console.log("Updated User");
+            }
+
+            
+
+
+            // Clearzz
+            setProfile((prev) => prev ? { ...prev, ...updatePayload } : null);
+            setIsEditing(false);
+            setProfilePic(null); 
+            file2Upload.current = null;
+            
+            alert("Profile updated!");
+        } catch (error) {
+            console.error("Failed to save:", error);
+            alert("Save failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+            window.location.reload();
+        }
+
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleProfile = async ( e : any) => {
+        const Max_Upload = 5 * 1024 * 1024;
+        const selectedFile = e.target.files?.[0];
+        if (!selectedFile) return; // null check
+
+        console.log("SIZE: ", (selectedFile.size / (1024 * 1024)).toFixed(5)); // AS MB READER
+        // Check the size!! It needs to be lower than 50mb for the Supbase free tier
+        // NOTE: THIS LOGIC IS THE OPPOSITE REJECTS ALL GREATER THAN MB
+        if (selectedFile.size > Max_Upload) {
+            alert("File size too big, try to maintain within 50mb")
+            return; 
+        }
+
+        // Others wise try to set a local upload
+        try {
+            setIsLoading(true);
+
+
+
+            // We create some local url instance, for frontend only
+
+            const localUrl = URL.createObjectURL(selectedFile);
+            console.log(localUrl);
+            setProfilePic(localUrl);
+            file2Upload.current = selectedFile;
+
+        } catch (error) {
+            console.log("ERROR UPLOAD: ", error);
+        } 
+        finally {
+            setIsLoading(false)
+        }
+
+    }
+
 
 
     return (
@@ -73,7 +197,6 @@ function Profilepage() {
                 onSignInClick={() => {}} 
                 onCtaClick={() => {}} 
                 onCreateClick={() => {}}
-                reduxFunc={() => {}}
                 userIdSession = {id}    
                 onLogoClick={() => navigate("/")}
             
@@ -88,14 +211,13 @@ function Profilepage() {
                     
                     {/* CLICKABLE PICTURE LOCATION */}
                     <div className='relative group'>
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+                        <input type="file" ref={file} className="hidden" accept="image/*" onChange={handleProfile} />
                         <div 
-                            onClick={handleImageClick}
                             className={`pic-holder overflow-hidden border-4 border-neutral-200 rounded-xl bg-neutral-800 w-[200px] h-[200px] shadow-xl ${isOwnProfile ? 'cursor-pointer hover:opacity-80' : ''}`}
                         >
-                            {profile?.avatar_url ? (
+                            {profile?.avatar_url || profilePic ? (
                                 <img 
-                                    src={profile.avatar_url} 
+                                    src={profilePic || profile?.avatar_url} 
                                     className="w-full h-full object-cover"
                                     alt="Profile"
                                 />
@@ -103,10 +225,16 @@ function Profilepage() {
                                 <div className="flex h-full items-center justify-center text-neutral-500 text-xs">No Image</div>
                             )}
                             
-                            {isOwnProfile && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    <p className="text-white text-xs">Change Photo</p>
-                                </div>
+                            {isOwnProfile && isEditing && (
+                                <>
+                                    <div 
+                                    onClick={() => file.current?.click()}
+                                    className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <p className="text-white text-xs">Change Photo</p>
+                                    </div>
+                                </>
+
+                                
                             )}
                         </div>
                     </div>
@@ -122,7 +250,7 @@ function Profilepage() {
                             {isOwnProfile && (
                                 <Button 
                                     variant={isEditing ? "destructive" : "outline"} 
-                                    onClick={() => setIsEditing(!isEditing)}
+                                    onClick={() => editToggle()}
                                     className="gap-2"
                                 >
                                     <Pencil size={16} />
@@ -133,6 +261,7 @@ function Profilepage() {
 
                         {isEditing ? (
                             <textarea 
+                                ref={bioRef}
                                 className="mt-4 p-3 border-2 border-neutral-300 rounded-md bg-transparent focus:border-black outline-none h-32"
                                 defaultValue={profile?.bio}
                                 placeholder="Tell us about yourself..."
@@ -144,7 +273,7 @@ function Profilepage() {
                         )}
                         
                         {isEditing && (
-                            <Button className="mt-4 self-end" >
+                            <Button className="mt-4 self-end" onClick={handleSaveChanges} >
                                 Save Changes
                             </Button>
                         )}
@@ -157,7 +286,7 @@ function Profilepage() {
                     
                     <div className='profile-blog-holder  shadow-[inset_0_1px_10px_rgba(0,0,0,0.3)] mt-5 w-full p-4 bg-neutral-50 '>
 
-                        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2'>
+                        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5  gap-2'>
                             {/* Reduce my overflow Usage needs some form of pagination*/}
                             {/** USE A CARD COMPONENT HERE CREATE one */}
                             {isOwnProfile && pageCur == 1 ? 
@@ -168,21 +297,11 @@ function Profilepage() {
                             }
 
                             {/* Should include create but offset dont load*/}
-                            {Array.from({ length: blogItems })
-                            .slice((pageCur - 1) * 5, (pageCur - 1) * 5 + (isOwnProfile && pageCur === 1 ? 4 : 5)) // 0 - 5 || 5 - 10  what if 0 - 4, 4 - 9| 10 - 14
-                            .map((_, index) => {
+                            {blogItems && blogItems
+                            .slice((pageCur - 1) * itemsPerPage, (pageCur - 1) * itemsPerPage + (isOwnProfile && pageCur === 1 ? itemsPerPage - 1 : itemsPerPage)) // 0 - 5 || 5 - 10  what if 0 - 4, 4 - 9| 10 - 14
+                            .map((blog, index) => {
 
-                                // NOTE ISSUES WITH RERENDERS ILL FIX LATER
-                                // We use a real index based on the slice
-                                const actualIndex = ((pageCur - 1) * 5) + index + 1;
-
-                                // NOTE WE CAN USE COMPONENT HERE
-                                return (
-                                    <div key={actualIndex} className="min-h-[300px] bg-white border rounded-md shadow-sm p-4">
-                                        <h4 className="font-bold">Test Blog #{actualIndex}</h4>
-                                        <p className="text-sm text-gray-500">Placeholder for page {pageCur}.</p>
-                                    </div>
-                                );
+                                return <Card key={blog.id} blog={blog}></Card>
                             })}
 
                             {/** Map Something Here Always End With a spacing Flex*/}
@@ -192,7 +311,7 @@ function Profilepage() {
                         </div>
                         
                             <div className='page-holder gap-1 flex flex-row shadow-[inset_0_1px_10px_rgba(0,0,0,0.3)] mt-5 w-full p-4 bg-neutral-50'>
-                                {Array.from({length: pageNumber}).map((_, index) => {
+                                {Array.from({length: pageNumber.current}).map((_, index) => {
                                     const pageNum = index + 1;
                                     return( 
                                         <button

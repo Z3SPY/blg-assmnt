@@ -3,11 +3,12 @@ import type { SessionPayload } from "../state/session/session";
 
 
 interface BlogType {
-    id: string;
-    userId: string;
+    id?: string;
+    user_id: string;
     title?: string;
+    cover_path?: string;
     content?: string;
-    createdAt?: string;
+    created_at?: string;
 }
 
 interface ProfileType {
@@ -15,7 +16,7 @@ interface ProfileType {
     username?: string;
     bio?: string;
     avatar_url?: string;
-    createdAt?: string;
+    created_at?: string;
 }
 
 // UserModel Validation

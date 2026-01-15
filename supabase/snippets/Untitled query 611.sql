@@ -1,0 +1,1 @@
+select auth.uid(), current_setting('request.jwt.claims', true);
