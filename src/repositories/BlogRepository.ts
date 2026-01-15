@@ -39,22 +39,23 @@ class BlogRepository implements IBlogRepository {
     }
 
     
-    async getAllBlogs(page: number, pageSize = 5): Promise<{ data: BlogType[], count: number}> {
+    async getAllBlogs(page: number, pageSize = 5, searchTerm: string = ""): Promise<{ data: BlogType[], count: number}> {
 
-        const startVal = (page - 1) * pageSize;
-        const endVal = startVal + pageSize - 1;
+        let query = supabase
+        .from('blogs')
+        .select('*', { count: 'exact' });
 
-        const { data, error, count } = await supabase
-            .from('blogs')
-            .select('*', { count: 'exact' })
-            .order('created_at', { ascending: false })
-            .range(startVal, endVal);
+        if (searchTerm != "" || searchTerm != null) {
+            query = query.ilike('title', `%${searchTerm}%`);
+        }
 
+        const { data, count, error } = await query
+            .range((page - 1) * pageSize, page * pageSize - 1)
+            .order('created_at', { ascending: false });
+        
         if (error) throw error;
-        return { 
-            data: data as BlogType[], 
-            count: count || 0 
-        };
+
+        return { data, count: count || 0 };
 
     }
 

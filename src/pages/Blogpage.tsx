@@ -141,7 +141,6 @@ function Blogpage() {
                 </button>
             </div>
 
-            <BlogFooter />
         </div>
     )
 }

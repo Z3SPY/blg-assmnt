@@ -244,7 +244,6 @@ You can add more images:`,
         </div>
 
     </div>
-    <BlogFooter />
     </>
     
   )

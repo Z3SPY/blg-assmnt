@@ -204,7 +204,7 @@ function Profilepage() {
             />
             
 
-            <div className='h-screen flex-grow mx-5 md:mx-32 my-10'>
+            <div className='min-h-screen flex-grow mx-5 md:mx-32 my-10'>
                 
                 {/** PROFILE SLICE */}
                 <div className='profile-holder flex flex-col md:flex-row gap-8 items-start border-b-2 pb-10 mb-5 '> 
@@ -281,7 +281,7 @@ function Profilepage() {
                 </div> 
                 
                 {/** BLOGS SLICE */}
-                <div>
+                <div className=''>
                     <h2 className='text-[1.25rem] italic'> {profile?.username}'s Blogs </h2>
                     
                     <div className='profile-blog-holder  shadow-[inset_0_1px_10px_rgba(0,0,0,0.3)] mt-5 w-full p-4 bg-neutral-50 '>
@@ -338,10 +338,7 @@ function Profilepage() {
 
                 </div>
 
-            </div>
-
-            <BlogFooter />
-
+            </div> 
 
         </div>
     )

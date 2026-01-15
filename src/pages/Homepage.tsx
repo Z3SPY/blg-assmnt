@@ -32,10 +32,12 @@ function Homepage() {
     const [totalPages, setTotalPages] = useState(0);
     const [blogs, setBlogs] = useState<BlogType[]>([]);
 
+    const [searchQuery, setSearchQuery] = useState("");
+
     
     useEffect(() => {
         const fetchPage = async () => {
-            const result = await blogRepository.getAllBlogs(currentPage, 5); 
+            const result = await blogRepository.getAllBlogs(currentPage, 5, searchQuery); 
             setBlogs(result.data);
             const pages = Math.ceil(result.count / 5);
             setTotalPages(pages);
@@ -44,22 +46,7 @@ function Homepage() {
         
         fetchPage();
 
-        const channel = supabase
-        .channel('schema-db-changes')
-        .on('postgres_changes', 
-            { event: 'INSERT', schema: 'public', table: 'blogs' }, 
-            (payload) => {
-            console.log('New blog added!', payload);
-            fetchPage(); 
-            }
-        )
-        .subscribe();
-
-        return () => {
-        supabase.removeChannel(channel); // Cleanup
-        };
-
-    }, [currentPage])
+    }, [currentPage, searchQuery])
 
 
 
@@ -169,6 +156,17 @@ function Homepage() {
                         >
                             Next
                         </Button>
+
+                        <input 
+                            type="text"
+                            placeholder="Search blogs..."
+                            className="px-4 py-2 border rounded-md focus:ring-2 focus:ring-black outline-none"
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1); 
+                            }}
+                        />
+                        
                     </div>
                     
                     {/** Blogs here */}

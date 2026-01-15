@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 
 
 import "./index.css"
+import BlogFooter from './components/Footer';
 
 function App() {
 
@@ -60,22 +61,24 @@ function App() {
     /** Note this needs middle ware */
 
     <Router>
-      <Routes>
-        <Route path='/' element={<Homepage />}></Route>
-
-
-        {/** BLOGS */}
-        <Route path='/form' element={<Formpage />}></Route>
-        <Route path='/blog/:id' element={<Blogpage />}></Route>
-
-        {/** AUTHENTICATION */}
-        <Route path='/login' element={<Authpage AuthState={false} />} />
-        <Route path='/signup' element={<Authpage AuthState={true} />} />
-        <Route path='/auth' element={<Authpage />}></Route>
-
-        {/** PROFILE */}
-        <Route path='/profile/:id' element={<Profilepage />}></Route>
-      </Routes>
+      <div className='flex flex-col min-h-screen'>
+        <main className="flex-grow">
+          <Routes>
+            <Route path='/' element={<Homepage />}></Route>
+            {/** BLOGS */}
+            <Route path='/form' element={<Formpage />}></Route>
+            <Route path='/blog/:id' element={<Blogpage />}></Route>
+            {/** AUTHENTICATION */}
+            <Route path='/login' element={<Authpage AuthState={false} />} />
+            <Route path='/signup' element={<Authpage AuthState={true} />} />
+            <Route path='/auth' element={<Authpage />}></Route>
+            {/** PROFILE */}
+            <Route path='/profile/:id' element={<Profilepage />}></Route>
+          </Routes>
+        </main>
+        <BlogFooter />
+      </div>
+     
     </Router>
   )
 }

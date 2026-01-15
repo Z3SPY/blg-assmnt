@@ -81,10 +81,12 @@ class UserRepositories implements IUserRepository {
             urlRef = data.publicUrl;
         }
 
+        const { id: _, ...updateData } = user
+
         const {data, error} = await supabase
             .from("profile")
             .update({
-                ...user,
+                ...updateData,
                 avatar_url: urlRef
             })
             .eq("id", id)
