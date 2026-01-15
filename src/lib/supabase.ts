@@ -6,5 +6,8 @@ const supabaseKey = import.meta.env.VITE_PUBLISHABLE as string;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Supabase environment variables are missing!");
+}
 
 export { supabase };
