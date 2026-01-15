@@ -64,7 +64,7 @@ function Homepage() {
 
 
             {/** Need to Flow Scroll REMINDER: ILL DO IT LATER LOW PRIO */}
-            <div id="#home" className="mb-12">
+            <div id="home" className="mb-12">
                 <div className='body flex flex-col h-full font-sans'>
                     {/** MAIN BOX HERE  */}
                     <div className="overflow-hidden min-h-[70vh] mx-4 sm:mx-8 md:mx-12 lg:mx-20 px-4 sm:px-8 md:px-16 lg:px-28 py-6 md:py-10 my-3 rounded-2xl bg-neutral-900 shadow-slate-400 shadow-lg drop-shadow-md flex flex-col justify-start items-start">  
