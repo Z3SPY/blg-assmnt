@@ -66,7 +66,7 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
 // Have to do use STATE for changes in ACTIVE do it later
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
-  { href: '#', label: 'Home', active: true, },
+  { href: '#home', label: 'Home', active: true, },
   { href: '#blogs', label: 'Blogs' },
   { href: '#about', label: 'About' },
 ];

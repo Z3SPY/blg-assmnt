@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import CardGrid from '@/components/CardGrid';
 import { blogRepository } from '@/repositories/BlogRepository';
 import type { BlogType } from '@/types/stateTypes';
+import { supabase } from '@/lib/supabase';
 
 function Homepage() {
 
@@ -31,6 +32,7 @@ function Homepage() {
     const [totalPages, setTotalPages] = useState(0);
     const [blogs, setBlogs] = useState<BlogType[]>([]);
 
+    
     useEffect(() => {
         const fetchPage = async () => {
             const result = await blogRepository.getAllBlogs(currentPage, 5); 
@@ -39,8 +41,24 @@ function Homepage() {
             setTotalPages(pages);
             
         };
-
+        
         fetchPage();
+
+        const channel = supabase
+        .channel('schema-db-changes')
+        .on('postgres_changes', 
+            { event: 'INSERT', schema: 'public', table: 'blogs' }, 
+            (payload) => {
+            console.log('New blog added!', payload);
+            fetchPage(); 
+            }
+        )
+        .subscribe();
+
+        return () => {
+        supabase.removeChannel(channel); // Cleanup
+        };
+
     }, [currentPage])
 
 
