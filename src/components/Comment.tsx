@@ -1,9 +1,9 @@
 
 import type { CommentType } from '@/types/stateTypes'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { ImagePlus, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { commentRepository } from '@/repositories/CommentRepository';
 
 interface CommentProps {
@@ -12,13 +12,15 @@ interface CommentProps {
 
   onUpdate: (id: string, content: string) => void;
   onDelete: (id: string) => void;
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 
 }
 
-function Comment({ comment, userId, onUpdate, onDelete}: CommentProps) {
+function Comment({ comment, userId, onUpdate, onDelete, onFileChange: handleFileChange}: CommentProps) {
 
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const c = comment
     console.log("Comment: ", c.id);
@@ -77,6 +79,23 @@ function Comment({ comment, userId, onUpdate, onDelete}: CommentProps) {
             {/** EDIT TOGGLE */}
             {isEditing ? (
                 <div className="mt-2 space-y-2">
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange} 
+                    />
+
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        type="button"
+                        className="shrink-0 border-neutral-900"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <ImagePlus size={18} />
+                    </Button>
                     <textarea 
                         className="w-full border rounded-md p-2 text-sm text-neutral-700 outline-none focus:ring-2 focus:ring-blue-500"
                         value={editContent}
@@ -93,7 +112,22 @@ function Comment({ comment, userId, onUpdate, onDelete}: CommentProps) {
                     </div>
                 </div>
             ) : (
-                <p className="text-neutral-700 text-sm whitespace-pre-wrap">{c.content}</p>
+                <>
+
+                    {/** Show me an Image OR ELSE !!! none */}
+                    {c.image_url && (
+                        <div className="mt-3 overflow-hidden mb-10 border-neutral-200">
+                            <img 
+                            src={c.image_url} 
+                            alt="Attachment" 
+                            className="max-h-[300px] w-auto object-contain cursor-zoom-in"
+                            onClick={() => window.open(c.image_url, '_blank')} 
+                            />
+                        </div>
+                    )}
+                    <p className="text-neutral-700 text-sm whitespace-pre-wrap">{c.content}</p>
+                </>
+
             )}
         </div>
     )

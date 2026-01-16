@@ -19,10 +19,35 @@ class CommentRepository implements ICommentRepository {
     }
 
     // Create Comment
-    async create(comment: commentPayload): Promise<CommentType> {
+    async create(comment: commentPayload, imageFile?: File): Promise<CommentType> {
+        let urlRef  = "";
+
+        if (imageFile) {
+            const fileName = `${comment.blog_id}-${Date.now()}.${comment.user_id}` 
+            const url = `blgPhoto/${fileName}`;
+
+            // Store it in blog-covers
+            const {error : photoError} = await supabase.storage
+                .from("blog-covers")
+                .upload(url, imageFile, {
+                    upsert: false,
+                    cacheControl: '3600'
+                })
+            
+            if (photoError) throw photoError;
+
+            // Then we proceed to get a reference instance
+            const { data } = await supabase.storage
+                .from("blog-covers")
+                .getPublicUrl(url);
+
+            
+            urlRef = data.publicUrl;
+        }
+
         const {data, error} = await supabase
             .from('comments')
-            .insert(comment)
+            .insert({...comment, image_url: urlRef})
             .select()
             .single()
 
@@ -31,10 +56,33 @@ class CommentRepository implements ICommentRepository {
     }
 
     // Update Comment
-    async update(id: string, content: string): Promise<CommentType> {
+    async update(id: string, content: string, imageFile?: File): Promise<CommentType> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const updateData: any = { content };
+
+        if (imageFile) {
+            const fileExt = imageFile.name.split('.').pop();
+            const fileName = `update-${id}-${Date.now()}.${fileExt}`;
+            const path = `comment-images/${fileName}`;
+
+            const { error: photoError } = await supabase.storage
+                .from("blog-covers")
+                .upload(path, imageFile);
+
+            if (photoError) throw photoError;
+
+            const { data: urlData } = supabase.storage
+                .from("blog-covers")
+                .getPublicUrl(path);
+            
+            updateData.image_url = urlData.publicUrl;
+        }
+
+
+
         const { data, error } = await supabase
             .from('comments')
-            .update({ content })
+            .update(updateData)
             .eq('id', id)
             .select()
             .single();

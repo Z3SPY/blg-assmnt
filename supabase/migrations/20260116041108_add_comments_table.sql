@@ -4,6 +4,7 @@ CREATE TABLE public.comments (
   user_id uuid REFERENCES auth.users(id) NOT NULL,
   username text NOT NULL,
   content text NOT NULL,
+  image_url text,
   created_at timestamp with time zone DEFAULT now()
 );
 

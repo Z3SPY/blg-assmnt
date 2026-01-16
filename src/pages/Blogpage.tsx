@@ -11,6 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { commentRepository } from '@/repositories/CommentRepository';
 import Comment from '@/components/Comment';
+import { ImagePlus, X } from 'lucide-react';
 
 
 function Blogpage() {
@@ -73,7 +74,7 @@ function Blogpage() {
     
         }, [id, navigate, userId])
 
-    
+    //BLOG HANDLES
     const HandleDelete = async () => {
         const isConfirmed = confirm("Are you sure you want to delete this blog? This action cannot be undone.");
     
@@ -101,7 +102,24 @@ function Blogpage() {
     // Call supabase repository to get blog by id
 
 
-    // COMMENTS AND INTERACTIONS
+    // COMMENTS AND INTERACTIONS HANDLES
+    const [selectedFile, setSelectedFile] = useState<File | null>();
+    const [imageView, setImageView] = useState<string | null>();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            setImageView(URL.createObjectURL(file)); // Create local preview
+        }
+    };
+
+    const clearImage = () => {
+        setSelectedFile(null);
+        setImageView(null);
+    };
+
     const HandleComment = async () => {
 
         if (!userId) {
@@ -118,11 +136,12 @@ function Blogpage() {
                 username: userName ||"Anonyomous",
                 content: myComment
             }
-           const data =  await commentRepository.create(newCommentObject);
+           const data =  await commentRepository.create(newCommentObject, selectedFile);
            if (!data) return;
            // append
-            setComments(prev => [newCommentObject, ...prev]);
+            setComments(prev => [data, ...prev]);
             setMyComment(""); // reset
+            clearImage();
         } catch (error) {
             console.log(error);
             alert("Could not post Comment. Please try again later")
@@ -149,7 +168,7 @@ function Blogpage() {
     const onCommentUpdate = async (id: string, updatedContent: string) => {
         if (!updatedContent.trim()) return;
         try {
-            const updatedComment = await commentRepository.update(id, updatedContent); 
+            const updatedComment = await commentRepository.update(id, updatedContent, selectedFile); 
             setComments((prev) => 
                 prev.map((c) => (c.id === id ? updatedComment : c))
             );
@@ -260,7 +279,35 @@ function Blogpage() {
                 
                  {/** Attached to the bottom */}
                 <div className='mt-10'>
+                    {imageView && (
+                        <div className="relative w-20 h-20 mb-2 border rounded-md overflow-hidden group">
+                            <img src={imageView} className="w-full h-full object-cover" />
+                            <button 
+                                onClick={clearImage}
+                                className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl-md"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    )}
+
                     <div className="flex gap-2 mb-8">
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            ref={fileInputRef} 
+                            onChange={handleFileChange} 
+                        />
+                        
+                        <Button 
+                            variant="outline" 
+                            size="icon" 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="border-neutral-900"
+                        >
+                            <ImagePlus size={18} />
+                        </Button>
                         <input 
                             type="text" 
                             className="flex-1 border rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 border-neutral-900"
@@ -280,6 +327,7 @@ function Blogpage() {
                                         userId={userId}
                                         onDelete={onCommentDelete}
                                         onUpdate={onCommentUpdate}
+                                        onFileChange={handleFileChange}
                                         />
                             ))
                         ) : (
