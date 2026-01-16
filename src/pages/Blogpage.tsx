@@ -170,10 +170,12 @@ function Blogpage() {
         }
     };
 
-    const onCommentUpdate = async (id: string, updatedContent: string) => {
+    const onCommentUpdate = async (id: string, updatedContent: string, newFile?: File | null) => {
         if (!updatedContent.trim()) return;
+
+
         try {
-            const updatedComment = await commentRepository.update(id, updatedContent, selectedFile); 
+            const updatedComment = await commentRepository.update(id, updatedContent, newFile); 
             setComments((prev) => 
                 prev.map((c) => (c.id === id ? updatedComment : c))
             );
@@ -332,7 +334,6 @@ function Blogpage() {
                                         userId={userId}
                                         onDelete={onCommentDelete}
                                         onUpdate={onCommentUpdate}
-                                        onFileChange={handleFileChange}
                                         />
                             ))
                         ) : (

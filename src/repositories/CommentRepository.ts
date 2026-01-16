@@ -71,13 +71,12 @@ class CommentRepository implements ICommentRepository {
 
             if (photoError) throw photoError;
 
-            const { data: urlData } = supabase.storage
+            const { data: urlData } = await supabase.storage
                 .from("blog-covers")
                 .getPublicUrl(path);
             
             updateData.image_url = urlData.publicUrl;
         }
-
 
 
         const { data, error } = await supabase
@@ -86,6 +85,7 @@ class CommentRepository implements ICommentRepository {
             .eq('id', id)
             .select()
             .single();
+
 
         if (error) throw error;
         return data;

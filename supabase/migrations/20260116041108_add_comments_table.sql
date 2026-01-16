@@ -15,3 +15,6 @@ CREATE POLICY "Allow public read access" ON public.comments
 
 CREATE POLICY "Allow individual insert" ON public.comments
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Allow individual update" ON public.comments
+  FOR UPDATE USING (auth.uid() = user_id);

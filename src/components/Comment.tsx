@@ -10,27 +10,40 @@ interface CommentProps {
   comment: CommentType;
   userId?: string;  
 
-  onUpdate: (id: string, content: string) => void;
+  onUpdate: (id: string, content: string, file: File) => void;
   onDelete: (id: string) => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 
 }
 
-function Comment({ comment, userId, onUpdate, onDelete, onFileChange: handleFileChange}: CommentProps) {
+function Comment({ comment, userId, onUpdate, onDelete}: CommentProps) {
 
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [localFile, setLocalFile] = useState<File | null>(null);
 
     const c = comment
     console.log("Comment: ", c.id);
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+    
+        if (file) {
+            
+            setLocalFile(file);
+        }
+    };
     
 
-    const handleSave = () => {
-        onUpdate(comment.id, editContent);
+    const handleSave = async () => {
+    try {
+        await onUpdate(comment.id, editContent, localFile);
         setIsEditing(false);
-    };
+        setLocalFile(null); 
+    } catch (err) {
+        console.error("Save failed", err);
+    }
+};
     
     const toggleEdit = () => {
         setIsEditing((prev) => !prev);
