@@ -11,7 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { commentRepository } from '@/repositories/CommentRepository';
 import Comment from '@/components/Comment';
-import { ImagePlus, X } from 'lucide-react';
+import { ImagePlus, Loader, Loader2, X } from 'lucide-react';
 
 
 function Blogpage() {
@@ -127,8 +127,11 @@ function Blogpage() {
             return;
         }
 
+
+        if (isLoading) return;
         
         try {
+            setIsLoading(true);
             //Simple data validation
             const newCommentObject : commentPayload = {
                 blog_id: id,
@@ -145,6 +148,8 @@ function Blogpage() {
         } catch (error) {
             console.log(error);
             alert("Could not post Comment. Please try again later")
+        } finally {
+            setIsLoading(false);
         }
             
             
@@ -315,7 +320,7 @@ function Blogpage() {
                             value={myComment}
                             onChange={(e) => setMyComment(e.target.value)} 
                         />
-                        <Button onClick={()=>HandleComment()} disabled={!myComment.trim()}> Send </Button>
+                        <Button onClick={()=>HandleComment()} disabled={!myComment.trim() || isLoading}> {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"} </Button>
                     </div>
                     
                     {/** Comment Holder */}
