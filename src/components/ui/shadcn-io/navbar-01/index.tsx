@@ -114,6 +114,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
 
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
+    const [whichIsActive, setActive] = useState("Home");
 
     useEffect(() => {
       const checkWidth = () => {
@@ -246,10 +247,11 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                         <button
                           onClick={(e) => {e.preventDefault();
                               document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
+                              setActive(link.label);
                             }}
                           className={cn(
                             "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
-                            link.active 
+                            whichIsActive == link.label
                               ? "bg-accent text-accent-foreground" 
                               : "text-foreground/80 hover:text-foreground"
                           )}
