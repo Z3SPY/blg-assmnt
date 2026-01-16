@@ -32,7 +32,8 @@ export function Card({blog}: CardProps) {
         <div key={blog.id} className="transition-all hover:translate-y-[5px] hover:bg-neutral-200 cursor-pointer
                                         min-h-[300px]bg-white border rounded-md shadow-sm p-4" onClick={()=>navigate(`/blog/${blog.id}`)}>
             {/** This is image loc */}
-            <div className="w-full h-40 bg-neutral-200 flex items-center justify-center overflow-hidden">
+
+            <div className="w-full h-40 bg-neutral-100 flex items-center justify-center overflow-hidden">
                 {blog.cover_path ? (
                     <img 
                         src={blog.cover_path} 

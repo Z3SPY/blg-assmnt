@@ -45,7 +45,7 @@ class BlogRepository implements IBlogRepository {
         .from('blogs')
         .select('*', { count: 'exact' });
 
-        if (searchTerm != "" || searchTerm != null) {
+        if (searchTerm) {
             query = query.ilike('title', `%${searchTerm}%`);
         }
 
@@ -63,7 +63,7 @@ class BlogRepository implements IBlogRepository {
 
     // ===================
     // Session Views
-    async createBlog(blog: BlogType, blogFile: File): Promise<BlogType> {
+    async createBlog(blog: BlogType, blogFile?: File): Promise<BlogType> {
         // Validate blog
         let urlRef = "";
 
@@ -105,7 +105,7 @@ class BlogRepository implements IBlogRepository {
     }
 
     
-    async updateBlog(id: string, blog: BlogType, blogFile: File): Promise<BlogType> {
+    async updateBlog(id: string, blog: BlogType, blogFile?: File): Promise<BlogType> {
         // Validate blog
         let urlRef = blog.cover_path;
 
@@ -148,13 +148,15 @@ class BlogRepository implements IBlogRepository {
         if (error) throw error;
         //console.log(data);
         return data as BlogType;
-        }
+    }
 
     async deleteBlog(id: string): Promise<void> {
         const response = await supabase
             .from('blogs')
             .delete()
             .eq('id', id)
+
+        if (response.error) throw response.error;
 
         return;
     }

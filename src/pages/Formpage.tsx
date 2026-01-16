@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { Markdown } from '@tiptap/markdown'
 import { useEditor } from '@tiptap/react'
+import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
@@ -37,7 +38,7 @@ function Formpage() {
     }, [userId, navigate])
 
     const [blogTitle, setBlogTitle] = useState('')
-    const [isEditing, setIsEditing] = useState(false)
+    const [isEditing, setIsEditing] = useState(true)
 
 
     // =============================================
@@ -58,15 +59,12 @@ function Formpage() {
         StarterKit,
         Image,
         TableKit,
-        Markdown
+        Markdown,
+        Placeholder.configure({
+            placeholder:'Start writing about your experience...'
+        })
     ],
-    content: `
-
-# Hello World
-
-This is **Markdown**!
-
-You can add more images:`,
+    content: '',
     contentType: 'markdown',
     editable: isEditing,
   })
@@ -154,8 +152,8 @@ You can add more images:`,
     // Blog Upload 
     const handleBlogUpload = async (markdown: string) => {
       // Do some data validation here for later, i might forget
-      if (!blogTitle || !editor) {
-          alert("Missing Values in Blog Instance");
+      if (!blogTitle || editor.getText().trim().length === 0) {
+          alert("Missing Values in Blog Instance. Please add either both a title and content");
           return;
       }
 
@@ -177,11 +175,12 @@ You can add more images:`,
         
         // Checks if update or create
         if (!isUpdating) {
+            /*
             if (!file) {
-              alert("Please upload a cover photo");
+             // Lets use a default from our assets
               return;
-            }
-            await blogRepository.createBlog(newBlog, file);
+            }*/
+            await blogRepository.createBlog(newBlog, file ?? undefined);
             alert("Blog created successfully!");
           
         } else {

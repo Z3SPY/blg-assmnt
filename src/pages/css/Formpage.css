@@ -16,6 +16,14 @@
     font-size: 30px !important;
 }
 
+.ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    float: left;
+    pointer-events: none;
+    height: 0;
+}
+
 
 .view-mode-container img {
     display: block;

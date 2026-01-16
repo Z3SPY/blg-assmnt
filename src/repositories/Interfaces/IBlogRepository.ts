@@ -6,8 +6,7 @@ export interface IBlogRepository {
     getAllBlogs(page: number, pageSize : number, searchTerm: string): Promise<{ data: BlogType[], count: number}>;
     createBlog(blog: BlogType, coverFile?: File): Promise<BlogType>;
 
-    updateBlog(id: string, blog: BlogType, blogFile: File): Promise<BlogType>;
+    updateBlog(id: string, blog: BlogType, blogFile?: File): Promise<BlogType>;
     deleteBlog(id: string): Promise<void>;
-
 
 }

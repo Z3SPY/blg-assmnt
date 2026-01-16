@@ -3,12 +3,14 @@ import { Navbar01 } from '@/components/ui/shadcn-io/navbar-01';
 import { blogRepository } from '@/repositories/BlogRepository';
 import { userRepositry } from '@/repositories/UserRepository';
 import type { RootState } from '@/state/store';
-import type { BlogType, ProfileType } from '@/types/stateTypes';
+import type { BlogType, commentPayload, ProfileType } from '@/types/stateTypes';
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
+import { commentRepository } from '@/repositories/CommentRepository';
+import Comment from '@/components/Comment';
 
 
 function Blogpage() {
@@ -24,6 +26,11 @@ function Blogpage() {
     // Blog Content
     const [blogContent, setBlogContent] = useState<BlogType | null>(null);
     const [authorContent, setAuthorData] = useState<ProfileType | null>(null);
+
+
+    // Comment Holder
+    const [comments, setComments] = useState([]);
+    const [myComment, setMyComment] = useState("");
     
     
     useEffect(() => {
@@ -39,23 +46,23 @@ function Blogpage() {
                     setIsLoading(true);
                     {/** NOTE THIS IS BLOG ID NOT USER ID */}
                     const blogData = await blogRepository.getBlogById(id!);
+                    if (!blogData) throw new Error("Blog not found");
+
                     const authorData = await userRepositry.getUserById(blogData.user_id);
+                    const commentData = await commentRepository.getCommentsByBlogId(id);
                     
                     //Ownership
                     isOwnProfile.current = blogData.user_id === userId;
                     
-                    if (blogData && authorData) {
-                        setBlogContent(blogData);
-                        setAuthorData(authorData)
-                    } else {
-                        console.error("Blog not found");
-                        navigate("/");
-                    }
-    
+                    setBlogContent(blogData);
+                    setAuthorData(authorData)
+                    setComments(commentData);
     
                    
                 } catch (error) {
+                                
                     console.error("Error fetching profile:", error);
+                    navigate("/");
                 } finally {
                     setIsLoading(false);
                 }
@@ -64,7 +71,7 @@ function Blogpage() {
             fetchProfileData();
     
     
-        }, [id, navigate])
+        }, [id, navigate, userId])
 
     
     const HandleDelete = async () => {
@@ -92,6 +99,66 @@ function Blogpage() {
     }
 
     // Call supabase repository to get blog by id
+
+
+    // COMMENTS AND INTERACTIONS
+    const HandleComment = async () => {
+
+        if (!userId) {
+            alert("Please login to comment");
+            return;
+        }
+
+        
+        try {
+            //Simple data validation
+            const newCommentObject : commentPayload = {
+                blog_id: id,
+                user_id: userId,
+                username: userName ||"Anonyomous",
+                content: myComment
+            }
+           const data =  await commentRepository.create(newCommentObject);
+           if (!data) return;
+           // append
+            setComments(prev => [newCommentObject, ...prev]);
+            setMyComment(""); // reset
+        } catch (error) {
+            console.log(error);
+            alert("Could not post Comment. Please try again later")
+        }
+            
+            
+        
+    }
+
+    const onCommentDelete = async (id: string) => {
+        const isConfirmed = confirm("Are you sure you want to delete this comment?");
+        if (!isConfirmed) return;
+
+        try {
+            await commentRepository.delete(id);
+            
+            setComments((prev) => prev.filter((c) => c.id !== id));
+        } catch (error) {
+            console.error("Error deleting comment:", error);
+            alert("Failed to delete comment. Please try again.");
+        }
+    };
+
+    const onCommentUpdate = async (id: string, updatedContent: string) => {
+        if (!updatedContent.trim()) return;
+        try {
+            const updatedComment = await commentRepository.update(id, updatedContent); 
+            setComments((prev) => 
+                prev.map((c) => (c.id === id ? updatedComment : c))
+            );
+        } catch (error) {
+            console.error("Error updating comment:", error);
+            alert("Failed to save changes.");
+        } 
+    };
+
 
     return (
         <div>
@@ -191,7 +258,38 @@ function Blogpage() {
 
                 </div>
                 
+                 {/** Attached to the bottom */}
+                <div className='mt-10'>
+                    <div className="flex gap-2 mb-8">
+                        <input 
+                            type="text" 
+                            className="flex-1 border rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 border-neutral-900"
+                            placeholder='Add a comment...' 
+                            value={myComment}
+                            onChange={(e) => setMyComment(e.target.value)} 
+                        />
+                        <Button onClick={()=>HandleComment()} disabled={!myComment.trim()}> Send </Button>
+                    </div>
+                    
+                    {/** Comment Holder */}
+                    <div className="space-y-4">
+                        {comments.length > 0 ? (
+                            comments.map((c) => (
+                                <Comment key={c.id} 
+                                        comment={c} 
+                                        userId={userId}
+                                        onDelete={onCommentDelete}
+                                        onUpdate={onCommentUpdate}
+                                        />
+                            ))
+                        ) : (
+                            <p className="text-neutral-400 text-sm italic">No comments yet. Be the first to say something!</p>
+                        )}
+                    </div>
+                </div>
             </div>
+
+           
 
         </div>
     )
